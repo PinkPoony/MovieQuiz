@@ -107,6 +107,9 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="8pd-TH-5Mg">
+                                <rect key="frame" x="197" y="438" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
@@ -114,10 +117,13 @@
                             <constraint firstItem="mBz-fK-lbq" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="R1V-E4-7jd"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="mBz-fK-lbq" secondAttribute="trailing" constant="20" id="psd-Cn-3uD"/>
                             <constraint firstItem="mBz-fK-lbq" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="q1p-tV-ifF"/>
+                            <constraint firstItem="8pd-TH-5Mg" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="u9G-ZJ-V6U"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="mBz-fK-lbq" secondAttribute="bottom" id="uJ1-WV-4Y1"/>
+                            <constraint firstItem="8pd-TH-5Mg" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zNC-j7-hEL"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="8pd-TH-5Mg" id="WPQ-oN-lld"/>
                         <outlet property="counterLabel" destination="mrO-e3-jrW" id="FJf-gy-sqC"/>
                         <outlet property="imageView" destination="pD5-8m-jS6" id="dBG-EK-cbb"/>
                         <outlet property="noButton" destination="EPb-2J-GbL" id="FBI-D4-WUg"/>

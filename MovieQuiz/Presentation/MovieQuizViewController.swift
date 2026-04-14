@@ -2,31 +2,37 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
-    @IBOutlet private var counterLabel: UILabel!
-    @IBOutlet private var textLabel: UILabel!
-    @IBOutlet private var imageView: UIImageView!
+    // MARK: - IBOutlets
+
+    @IBOutlet private weak var counterLabel: UILabel!
+    @IBOutlet private weak var textLabel: UILabel!
+    @IBOutlet private weak var imageView: UIImageView!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
     
+    // MARK: - Properties
+
     private let questionsAmount: Int = 10
     private let alertPresenter = AlertPresenter()
-    private let statisticService: StatisticServiceProtocol = StatisticService()
+    private var statisticService: StatisticServiceProtocol = StatisticService()
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
-    
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        statisticService = StatisticService()
+        showLoadingIndicator()
         self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
+        questionFactory.loadData()
     }
     
-    // MARK: - QuestionFactoryDelegate
+    // MARK: - Setup
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -38,23 +44,57 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
     }
-    
+    // MARK: - Actions
+
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-        
+        handleAnswer(true)
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        handleAnswer(false)
     }
+    
+    // MARK: - Private Methods
+
+    private func handleAnswer(_ answer: Bool) {
+        guard let currentQuestion = currentQuestion else { return }
+        showAnswerResult(isCorrect: answer == currentQuestion.correctAnswer)
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    // MARK: - Network Methods
+    
+    private func showNetworkError(message: String) {
+        let model = AlertModel(title: "Ошибка!", message: "Произошла ошибка сети", buttonText: "Попробовать ещё раз") { [weak self] in
+            guard let self = self else { return }
+            
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            
+            self.questionFactory?.requestNextQuestion()
+        }
+        alertPresenter.show(in: self, model: model)
+    }
+    
+     func didFailToLoadDataFromServer(error: any Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
+     func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
